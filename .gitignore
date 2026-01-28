@@ -1,0 +1,4 @@
+
+# Large artifacts / model weights
+*.safetensors
+Data/Dataset/SMILES/model.safetensors
