@@ -3,9 +3,13 @@
 ---
 
 ## 📄 Abstract
-> **Abstract**  
-Peptide molecules, owing to their vast chemical space and considerable modification potential, enable the balanced optimization of multiple properties in specific therapeutic scenarios and the development of ideal drug candidates. Thus, developing artificial intelligence approaches to overcome the cost inefficiencies of traditional trial-and-error methods and design multi-objective optimized peptidomimetics with extensive chemical space exploration has become an imperative challenge. To this end, we developed PepBrick, a structured multi-level nested reinforcement learning framework that explores the chemical-bioactivity space landscape of peptidomimetics via a hierarchical residue-sequence-topology progression strategy. Through a series of systematic experiments on isolated modules and proof-of-concept applications in the design of BBB-penetrating neuropeptides and tumor fluorescent probes, we fully validated the framework’s potential and robustness, which establishes a versatile and innovative paradigm for the development of next-generation peptide-based therapeutics.
-
+> **Abstract**
+<p align="center">
+  <img src="TOC.png" alt="Overview Figure" width="700"/>
+</p>
+Peptides feature a vast chemical space, extensive modifiability and an almost unlimited repertoire of unnatural amino acids, endowing them with the capacity to realize balanced optimization of multiple properties for specific therapeutic scenarios and generate ideal drug candidates. Accordingly, developing artificial intelligence-driven strategies to address the cost inefficiencies of traditional trial-and-error approaches, and to design multi-objectively optimized peptidomimetics via comprehensive chemical space exploration, has emerged as a critical imperative challenge in peptide drug development. To this end, we have developed PepBrick, a structured multi-level nested reinforcement learning framework. This framework explores the chemo-biological activity spatial landscape of peptidomimetics through a hierarchical residue-sequence-topology progression strategy, and further models and designs promising peptidomimetic candidates with potential for target diagnostic and thera
+peutic applications. We fully validated PepBricks potential and robustness through systematic module-specific experi
+ments and proof-of-concept applications in designing blood brain barrier-penetrating neuropeptides and tumor fluorescent probes. This work thus establishes a versatile and innovative paradigm for the development of next-generation peptide-based therapeutic agents.
 ---
 
 ## 🖼️ Overview
