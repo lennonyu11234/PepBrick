@@ -1,4 +1,4 @@
-# 🧪 PepBrick:  Design of Peptidomimetics Using a Multi-level Nested Structured Reinforcement Learning Model
+# 🧪 De Novo Design of Peptidomimetics via Hierarchical Coupling Reinforcement Learning
 
 ---
 
