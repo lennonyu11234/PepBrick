@@ -36,7 +36,7 @@ Peptidomimetic design is fundamentally constrained by the strong coupling among 
   torch_geometric = 2.6.1
 
 
-## ⚙️ Reproducible workflow: data preparation, scoring, reinforcement learning, and sampling
+## ⚙️ Data preparation, scoring, and reinforcement learning
 
 
 ### 1. Environment and example files
