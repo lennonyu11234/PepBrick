@@ -160,5 +160,118 @@ Outputs are:
 - `config.json`: architecture, optimization, label-threshold, partition, and seed settings.
 - `best_validation.json`: selected epoch and validation metrics.
 - `training_log.csv`: training loss and validation metrics by epoch.
+ 
 
-- 
+### 5. Reinforcement learning and molecular generation
+
+The integrated reinforcement-learning workflow is implemented in `Trainer.py`. During training, PepBrick samples linear peptidomimetics, applies the cyclization/linker policy, evaluates the resulting structures using pretrained scoring models, and updates the generation policies.
+
+The current example combines cyclic-peptide permeability prediction, MOR docking-score prediction, and neuropeptide classification. Molecules are generated during reinforcement learning.
+
+#### Required inputs
+
+Prepare the following resources before running the trainer:
+
+| Resource | Description |
+|---|---|
+| `Data/Dataset/SMILES/` | SMILES tokenizer and vocabulary |
+| `Data/Model/Final.pth` | Initial SMILES-generator weights loaded by the linker generators; the amino-acid generator is initialized within `RLWrapper` |
+| `AA_contribution.pth` | Pretrained residue-contribution model, loaded from the repository root |
+| Permeability scoring checkpoint | Loaded by `ScoringFunction(name="Cyclic_reg", func="regression")` |
+| MOR scoring checkpoint | Loaded by `ScoringFunction(name="Opioid", func="regression")` |
+| Neuropeptide scoring checkpoint | Loaded by `ScoringFunction(name="Neuro", func="classification")` |
+
+#### Run training and generation
+
+Run the following command from the repository root:
+
+```bash
+python Trainer.py
+```
+
+The default execution block is:
+
+```python
+if __name__ == "__main__":
+    trainer = TrainerRL(
+        max_len=6,
+        save_dir="Data/Result/generation/new",
+    )
+    trainer.train(
+        iteration=100,
+        batch_size=32,
+        save_every=1,
+        debug_anomaly=False,
+    )
+```
+
+Modify these arguments to configure the run:
+
+| Argument | Description |
+|---|---|
+| `max_len` | Number of residue-generation decisions per peptidomimetic |
+| `save_dir` | Directory for generated-sample CSV files |
+| `iteration` | Number of reinforcement-learning iterations |
+| `batch_size` | Target number of sampled linear structures per iteration |
+
+With within-iteration deduplication enabled, the trainer attempts to collect the requested batch size using canonical SMILES and a bounded number of resampling rounds.
+
+#### Reward and sampling settings
+
+The current example calculates the molecular reward as:
+
+```python
+reward = (
+    0.7 * permeability_score
+    + 0.3 * MOR_score
+    + 0.1 * neuropeptide_score
+    + nnaa_bonus
+)
+```
+
+The property scores are the reward-transformed outputs returned by the scoring models. The NNAA bonus is 0.1 for linear molecules that contain a sampled noncanonical residue and pass the corresponding scoring-validity check. The reward difference between the structures before and after cyclization guides the cyclization policy.
+
+
+| Setting | Default |
+|---|---|
+| Noncanonical amino-acid sampling pattern | `N[C@@H](C(=O)O)*` |
+| Linker sampling pattern | `C*` |
+| Amino-acid SMILES sampling temperature | 1.5 |
+| Linker SMILES sampling temperature | 1.5 |
+| Top-k for both SMILES generators | 20 |
+| Amino-acid SMILES generation limit | 100 generation steps |
+| Natural-residue entropy coefficient | 0.001 |
+| Gate entropy coefficient | 0.01 |
+| Noncanonical-residue entropy coefficient | 0.001 |
+| Cyclization entropy coefficient | 0.1 |
+
+These entropy terms encourage exploration during reinforcement learning. Different optimization objectives require corresponding changes to the scoring models and reward expression.
+
+#### Generated outputs
+
+At the specified export interval, the trainer writes:
+
+```text
+Data/Result/generation/new/step_<iteration>.csv
+```
+
+Each file contains the structures sampled during that iteration and their associated predictions and rewards:
+
+| Column | Description |
+|---|---|
+| `SMILES` | Linear peptidomimetic structure |
+| `SMILES_cyc` | Structure returned after applying the cyclization/linker policy |
+| `SMILES_linker` | Sampled linker structure, where applicable |
+| `Has_NNAA` | Whether a noncanonical residue was sampled |
+| `Is_Valid` | Validity mask used by the training procedure |
+| `cyc_type` | Selected cyclization action |
+| `True_permea_Before`, `True_permea_After` | Predicted permeability before and after cyclization |
+| `True_affi_Before`, `True_affi_After` | Predicted MOR docking scores before and after cyclization |
+| `True_neur_Before`, `True_neur_After` | Predicted neuropeptide classes before and after cyclization |
+| `Total_Reward` | Reward after cyclization |
+| `Total_Reward_delta` | Reward after cyclization minus reward before cyclization |
+| `Position_<i>` | Residue identity or NNAA indicator at position `<i>` |
+| `NNAA_<i>` | Noncanonical-residue SMILES at position `<i>`, where applicable |
+| `Contribution_<i>` | Predicted residue contribution at position `<i>` |
+
+The console reports policy, subgenerator, critic, and linker losses, together with mean rewards, validity rates, and NNAA usage. The current trainer exports sampling results during optimization.
